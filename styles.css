@@ -68,6 +68,7 @@ h1, h2, h3 {
     top: 0;
     left: 0;
     right: 380px; /* Leave room for sidebar */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Base styling (No sepia) */
@@ -478,4 +479,74 @@ h1, h2, h3 {
 .editor-controls {
     display: flex;
     gap: 10px;
+}
+
+/* =========================================
+   Mobile Responsiveness & Bottom Sheet
+========================================= */
+
+.toggle-sidebar {
+    position: absolute;
+    top: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #6d4c41;
+    color: white;
+    border: none;
+    border-radius: 20px 20px 0 0;
+    width: 60px;
+    height: 30px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    display: none; /* Only for mobile */
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 -4px 10px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+    .app-container {
+        flex-direction: column-reverse;
+    }
+    
+    .sidebar {
+        width: 100%;
+        height: 60vh;
+        max-height: 85vh;
+        position: fixed;
+        top: auto;
+        bottom: 0;
+        right: 0;
+        z-index: 3000;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border-left: none;
+        border-top: 3px solid #e2d1bc;
+        padding: 1rem;
+        border-radius: 20px 20px 0 0;
+    }
+    
+    .sidebar.collapsed {
+        transform: translateY(calc(100% - 45px));
+    }
+    
+    .toggle-sidebar {
+        display: flex;
+    }
+    
+    .sidebar.collapsed .toggle-sidebar .arrow {
+        transform: rotate(180deg);
+    }
+    
+    #map {
+        right: 0 !important;
+        bottom: 0;
+    }
+    
+    .map-title-overlay {
+        top: 1rem;
+        left: 1rem;
+        right: 1rem;
+        font-size: 1.3rem;
+        text-align: center;
+    }
 }
