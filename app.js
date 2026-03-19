@@ -127,13 +127,9 @@ function initMobileSidebar() {
         startHeight = sidebar.offsetHeight;
         sidebar.classList.add('dragging');
         
-        // If it was collapsed, and we start dragging, we effectively expand it
         if (sidebar.classList.contains('collapsed')) {
             sidebar.classList.remove('collapsed');
-            // When expanding from collapsed, the height in CSS is 50vh but it's translated down.
-            // We want to start the height from where it was (just the handle).
-            // But actually, it's easier to just let the user pull it up.
-            startHeight = 45; // Height of the collapsed "strip"
+            startHeight = 60; 
         }
     };
 
@@ -143,8 +139,8 @@ function initMobileSidebar() {
         const newHeight = startHeight + deltaY;
         
         // Limits
-        const maxHeight = window.innerHeight * 0.9;
-        const minHeight = 45;
+        const maxHeight = window.innerHeight * 0.95;
+        const minHeight = 60;
         
         if (newHeight >= minHeight && newHeight <= maxHeight) {
             sidebar.style.height = `${newHeight}px`;
@@ -160,10 +156,12 @@ function initMobileSidebar() {
         // Snap logic: if too short, collapse
         if (currentHeight < 100) {
             sidebar.classList.add('collapsed');
-            sidebar.style.height = ''; // Reset to CSS default (50vh + translateY)
-        } else {
-            // Keep the custom height
+            sidebar.style.height = ''; 
+        } else if (currentHeight > window.innerHeight * 0.8) {
+            // Snap to full
+            sidebar.style.height = '95vh';
         }
+        setTimeout(() => map.invalidateSize(), 300);
     };
 
     handle.addEventListener('touchstart', onTouchStart, { passive: true });
@@ -175,8 +173,7 @@ function initMobileSidebar() {
 function sidebarTo40() {
     const sb = document.getElementById('sidebar');
     if (!sb) return;
-    const h = window.innerHeight * 0.4;
-    sb.style.height = h + 'px';
+    sb.style.height = '40vh';
     sb.classList.remove('collapsed');
     setTimeout(() => { map.invalidateSize(); }, 400);
 }
@@ -187,10 +184,12 @@ function toggleSidebar() {
     
     if (sb.classList.contains('collapsed')) {
         sb.classList.remove('collapsed');
+        sb.style.height = '40vh';
     } else {
         sb.classList.add('collapsed');
-        sb.style.height = ''; // Reset custom height when manually closing
+        sb.style.height = ''; 
     }
+    setTimeout(() => map.invalidateSize(), 400);
 }
 
 function renderMapList() {
@@ -206,8 +205,12 @@ function renderMapList() {
             if (window.innerWidth <= 768) {
                 const sb = document.getElementById('sidebar');
                 if (sb && sb.classList.contains('collapsed')) {
-                    // Only expand if it was collapsed, but don't close if open
+                    // Start at 40% height if selecting while collapsed
+                    sb.style.height = '40vh';
                     sb.classList.remove('collapsed');
+                } else if (sb && sb.offsetHeight > window.innerHeight * 0.7) {
+                    // Shrink to 40% only if in full screen, to focus on the map
+                    sb.style.height = '40vh';
                 }
             }
         };
@@ -796,17 +799,16 @@ function startPracticeSession() {
     
     // Prepare buttons
     ui.btnCheck.innerHTML = "בדוק תשובות";
-    ui.btnCheck.className = "action-btn primary-btn";
     ui.btnCheck.style.background = ""; // Reset custom success background
     ui.btnCheck.onclick = checkPracticeAnswers;
 
     const allPlaces = [...MAP_DATA.practiceList];
     const selected = [];
-    const MIN_DIST = 0.55; // Increased minimum distance (~60km)
+    const MIN_DIST = 0.8; // Further increased minimum distance (~90km) to ensure no proximity issues
 
     // Selection logic with distance constraint
     let attempts = 0;
-    while (selected.length < 4 && attempts < 100) {
+    while (selected.length < 4 && attempts < 200) {
         const candidate = allPlaces[Math.floor(Math.random() * allPlaces.length)];
         const candCoord = MAP_DATA.places[candidate];
         
@@ -868,10 +870,17 @@ function startPracticeSession() {
         const input = item.querySelector('.term-select');
         btns.forEach(b => {
             b.onclick = () => {
+                const wasSelected = b.classList.contains('selected');
                 btns.forEach(btn => btn.classList.remove('selected'));
-                b.classList.add('selected');
-                input.value = b.dataset.val;
-                // Clear mark when changing answer
+                
+                if (!wasSelected) {
+                    b.classList.add('selected');
+                    input.value = b.dataset.val;
+                } else {
+                    input.value = "";
+                }
+                
+                // Clear marks on change
                 item.querySelector('.mark').textContent = '';
                 item.classList.remove('correct', 'wrong');
             };
