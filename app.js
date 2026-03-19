@@ -654,7 +654,15 @@ function loadMap(mapId, skipFly = false) {
 
     mapLayers.clearLayers();
     const b = MAP_DATA.bounds[mapObj.bounds || "israel"];
-    if (b && !skipFly) map.flyToBounds(b, { animate: true, duration: 1.5, padding: [30, 30] });
+    
+    let options = { animate: true, duration: 1.5, padding: [30, 30] };
+    if (window.innerWidth <= 768) {
+        const sbHeight = document.getElementById('sidebar')?.offsetHeight || window.innerHeight * 0.4;
+        options.paddingBottomRight = [20, sbHeight + 40]; // [x, y] - y is bottom padding
+        options.paddingTopLeft = [20, 20];
+    }
+
+    if (b && !skipFly) map.flyToBounds(b, options);
 
     if (mapObj.features) {
         mapObj.features.forEach(f => {
@@ -755,7 +763,14 @@ function startPracticeSession() {
     // Clear map and set global view
     mapLayers.clearLayers();
     const israelBounds = MAP_DATA.bounds["israel"];
-    map.flyToBounds(israelBounds, { padding: [50, 50] });
+    
+    let options = { padding: [50, 50] };
+    if (window.innerWidth <= 768) {
+        const sbHeight = document.getElementById('sidebar')?.offsetHeight || window.innerHeight * 0.4;
+        options.paddingBottomRight = [20, sbHeight + 60]; 
+        options.paddingTopLeft = [20, 20];
+    }
+    map.flyToBounds(israelBounds, options);
     ui.mapTitle.textContent = "תרגול זיהוי מקומות (רנדומלי)";
     ui.btnCheck.textContent = "בדוק תשובות";
     ui.btnCheck.onclick = checkPracticeAnswers;
@@ -812,9 +827,28 @@ function startPracticeSession() {
     shuffledNames.forEach(name => {
         const item = document.createElement('div');
         item.className = 'term-item';
-        let options = '<option value="">בחר מספר...</option>';
-        for (let i = 1; i <= 4; i++) options += `<option value="${i}">${i}</option>`;
-        item.innerHTML = `<span>${name}</span><select class="term-select" data-place="${name}">${options}</select>`;
+        
+        item.innerHTML = `
+            <span class="term-name">${name}</span>
+            <div class="number-selector">
+                <button type="button" class="num-btn" data-val="1">1</button>
+                <button type="button" class="num-btn" data-val="2">2</button>
+                <button type="button" class="num-btn" data-val="3">3</button>
+                <button type="button" class="num-btn" data-val="4">4</button>
+                <input type="hidden" class="term-select" data-place="${name}" value="">
+            </div>
+        `;
+
+        const btns = item.querySelectorAll('.num-btn');
+        const input = item.querySelector('.term-select');
+        btns.forEach(b => {
+            b.onclick = () => {
+                btns.forEach(btn => btn.classList.remove('selected'));
+                b.classList.add('selected');
+                input.value = b.dataset.val;
+            };
+        });
+
         ui.termList.appendChild(item);
     });
 }

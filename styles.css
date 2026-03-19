@@ -187,36 +187,76 @@ h1, h2, h3 {
 }
 
 .term-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 columns */
     gap: 0.8rem;
     margin-bottom: 1.5rem;
 }
 
+@media (max-width: 480px) {
+    .term-list {
+        gap: 0.5rem;
+    }
+}
+
 .term-item {
     display: flex;
+    flex-direction: column; /* Stack name and select on mobile-ish grid */
     align-items: center;
     background: #fff;
-    padding: 0.6rem 1rem;
-    border-radius: 6px;
+    padding: 0.8rem;
+    border-radius: 12px;
     border: 1px solid #dcd1c4;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    text-align: center;
 }
 
 .term-name {
-    flex-grow: 1;
-    font-weight: 600;
-    font-size: 1.1rem;
+    margin-bottom: 8px;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #4a3825;
 }
 
 .term-select {
-    padding: 0.4rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-family: inherit;
-    font-size: 1rem;
-    background-color: #fcf9f2;
+    display: none; /* Hide the hidden input, logic uses it for checking */
+}
+
+.number-selector {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 8px;
+    width: 100%;
+}
+
+.num-btn {
+    width: 36px;
+    height: 36px;
+    border: 2px solid #e2d1bc;
+    background: #fffdf9;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #6d4c41;
     cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    font-size: 0.95rem;
+}
+
+.num-btn:hover {
+    border-color: #6d4c41;
+    background: #fdfaf6;
+}
+
+.num-btn.selected {
+    background: #6d4c41;
+    color: #fff;
+    border-color: #6d4c41;
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(109,76,65,0.3);
 }
 
 .feedback-area {
@@ -543,6 +583,15 @@ h1, h2, h3 {
     transition: none !important;
 }
 
+.sidebar-drag-handle {
+    cursor: ns-resize;
+    touch-action: none !important; /* ONLY the handle should block scrolling */
+}
+
+.toggle-sidebar {
+    touch-action: none !important;
+}
+
 @media (max-width: 768px) {
     .app-container {
         flex-direction: column-reverse;
@@ -550,7 +599,7 @@ h1, h2, h3 {
     
     .sidebar {
         width: 100%;
-        height: 50vh; /* Default height */
+        height: 40vh; /* Reduced from 50vh */
         max-height: 90vh;
         min-height: 45px;
         position: fixed;
@@ -563,7 +612,7 @@ h1, h2, h3 {
         border-top: 3px solid #e2d1bc;
         padding: 1rem;
         border-radius: 25px 25px 0 0;
-        touch-action: none; /* Crucial for custom dragging logic */
+        /* No touch-action: none here! We want internal scrolling */
     }
     
     .sidebar-drag-handle {
@@ -572,7 +621,7 @@ h1, h2, h3 {
     
     .sidebar.collapsed {
         transform: translateY(calc(100% - 45px));
-        height: 50vh !important; /* Reset to base height when collapsed so it doesn't stay tall */
+        height: 40vh !important;
     }
     
     .toggle-sidebar {
