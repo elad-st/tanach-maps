@@ -221,6 +221,9 @@ function renderMapList() {
 function switchMode(mode) {
     if (mode === 'editor' && !SHOW_EDITOR) return;
 
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar) sidebar.classList.toggle('practice-mode', mode === 'practice');
+
     currentMode = mode;
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('active');
