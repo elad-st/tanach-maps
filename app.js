@@ -727,15 +727,42 @@ function loadMap(mapId, skipFly = false) {
     }
 
     if (!hidePlaces) {
-        if (mapObj.fadedPlaces) mapObj.fadedPlaces.forEach(p => drawCity(p, true));
-        if (mapObj.places) mapObj.places.forEach(p => drawCity(p, false));
+        // Collect all cities for this map
+        const citiesToDraw = [];
+        if (mapObj.fadedPlaces) mapObj.fadedPlaces.forEach(p => citiesToDraw.push({name: p, faded: true}));
+        if (mapObj.places) mapObj.places.forEach(p => citiesToDraw.push({name: p, faded: false}));
+        
+        // Basic collision check for labels
+        citiesToDraw.forEach((c1, i) => {
+            let offsetClass = "";
+            const coord1 = editorPlaces[c1.name] || MAP_DATA.places[c1.name];
+            if (!coord1) return;
+
+            citiesToDraw.forEach((c2, j) => {
+                if (i === j) return;
+                const coord2 = editorPlaces[c2.name] || MAP_DATA.places[c2.name];
+                if (!coord2) return;
+
+                const dist = calculateDistance(coord1, coord2);
+                if (dist < 0.12) { // Proximity threshold for label overlap
+                    if (coord1[0] > coord2[0]) offsetClass = "offset-up";
+                    else offsetClass = "offset-down";
+                }
+            });
+            drawCity(c1.name, c1.faded, offsetClass);
+        });
     }
 }
 
-function drawCity(name, faded) {
+function drawCity(name, faded, offsetClass = "") {
     const coords = editorPlaces[name] || MAP_DATA.places[name];
     if (!coords) return;
-    const icon = L.divIcon({ className: `custom-city-marker ${faded?'faded':''}`, html: `<div class="city-dot"></div><div class="city-text" dir="rtl">${name}</div>`, iconSize: [120, 20], iconAnchor: [4, 10] });
+    const icon = L.divIcon({ 
+        className: `custom-city-marker ${faded?'faded':''} ${offsetClass}`, 
+        html: `<div class="city-label-wrapper"><div class="city-dot"></div><div class="city-text" dir="rtl">${name}</div></div>`, 
+        iconSize: [1, 1], 
+        iconAnchor: [0, 0] 
+    });
     const m = L.marker(coords, { icon }).addTo(mapLayers);
     m._isMapCity = true;
 }
