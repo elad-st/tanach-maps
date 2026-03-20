@@ -287,10 +287,14 @@ h1, h2, h3 {
 .region-text {
     white-space: nowrap;
     font-family: 'Frank Ruhl Libre', serif;
-    font-weight: 900;
+    font-weight: 900 !important;
     color: #4e342e;
-    text-shadow: 0 0 10px white, 0 0 20px white;
+    text-shadow: 
+        0 0 8px white,
+        0 0 15px white,
+        0 0 25px white;
     text-align: center;
+    line-height: 1;
 }
 
 .region-text.small { font-size: 1.2rem; }
@@ -313,6 +317,11 @@ h1, h2, h3 {
    ========================================= */
 .custom-city-marker {
     pointer-events: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 0 !important;
+    height: 0 !important;
 }
 
 .city-dot {
@@ -322,32 +331,50 @@ h1, h2, h3 {
     border: 1.5px solid white;
     border-radius: 50%;
     box-shadow: 0 0 4px rgba(0,0,0,0.4);
-    position: absolute;
-    top: -4px;
-    left: -4px;
+    flex-shrink: 0;
+    z-index: 2;
 }
 
 .city-text {
     position: absolute;
-    right: 10px; /* Text to the left of the dot for Hebrew RTL */
-    top: 50%;
-    transform: translateY(-50%);
+    bottom: 10px; /* Default: Above the dot */
+    left: 50%;
+    transform: translateX(-50%);
     white-space: nowrap;
     font-size: 14px;
     font-weight: 700;
     color: #2c1e16;
     text-shadow: 
-        -1px -1px 0 #fff,  
-         1px -1px 0 #fff,
-        -1px  1px 0 #fff,
-         1px  1px 0 #fff,
-         0 0 5px rgba(255,255,255,0.8);
+        -2px -2px 0 #fff,  
+         2px -2px 0 #fff,
+        -2px  2px 0 #fff,
+         2px  2px 0 #fff,
+         0 0 8px rgba(255,255,255,1);
     transition: all 0.2s ease;
+    z-index: 1;
 }
 
-.offset-up .city-text { transform: translateY(-220%); }
-.offset-down .city-text { transform: translateY(120%); }
-.offset-left .city-text { right: auto; left: 10px; transform: translateY(-50%); }
+.offset-up .city-text { 
+    bottom: 15px; 
+}
+.offset-down .city-text { 
+    bottom: auto;
+    top: 10px; 
+}
+/* Side offsets if needed */
+.offset-left .city-text { 
+    bottom: auto;
+    top: 50%; 
+    left: auto;
+    right: 10px; 
+    transform: translateY(-50%);
+}
+.offset-right .city-text { 
+    bottom: auto;
+    top: 50%; 
+    left: 10px;
+    transform: translateY(-50%);
+}
 
 /* Zoom-based text scaling */
 .z-low .city-text { font-size: 10px; }

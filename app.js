@@ -756,23 +756,14 @@ function loadMap(mapId, skipFly = false) {
                 if (!coord2) return;
 
                 const dist = calculateDistance(coord1, coord2);
-                if (dist < 0.15) { // Increased proximity threshold for label overlap
+                if (dist < 0.20) { // Increased threshold for label overlap
                     // Vertical overlap logic
-                    if (coord1[0] > coord2[0]) {
-                        offsetClass = "offset-up";
-                    } else if (coord1[0] < coord2[0]) {
-                        offsetClass = "offset-down";
+                    if (Math.abs(coord1[0] - coord2[0]) > 0.01) {
+                        if (coord1[0] > coord2[0]) offsetClass = "offset-up";
+                        else offsetClass = "offset-down";
                     } else {
-                        // Same latitude? Use index order to decide
+                        // Very close in latitude? Use index to force one up one down
                         offsetClass = (i < j) ? "offset-up" : "offset-down";
-                    }
-
-                    // Secondary: Check horizontal proximity for additional offsetting if needed
-                    if (Math.abs(coord1[1] - coord2[1]) < 0.05) {
-                        if (coord1[1] < coord2[1]) {
-                             // This city is to the left of the other
-                             // Since text is on the right, we might need more room or a left offset
-                        }
                     }
                 }
             });
