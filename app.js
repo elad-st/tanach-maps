@@ -17,35 +17,35 @@ const SHOW_EDITOR = false; // Set to true to enable the editor tab again
 const ui = {};
 
 function init() {
-    ui.mapList         = document.getElementById('map-list');
-    ui.mapTitle        = document.querySelector('.map-title-overlay');
-    ui.panelLearn      = document.getElementById('panel-explore');
-    ui.panelPractice   = document.getElementById('panel-practice');
-    ui.panelEditor     = document.getElementById('editor-panel');
-    ui.practiceArea    = document.getElementById('practice-game-area');
-    ui.termList        = document.getElementById('term-list');
-    ui.feedback        = document.getElementById('feedback-area');
-    ui.btnCheck        = document.getElementById('btn-check-answers');
-    ui.btnStart        = document.getElementById('btn-start-practice');
-    ui.outputPoly      = document.getElementById('editor-output-poly');
-    ui.outputRivers    = document.getElementById('editor-output-rivers');
-    ui.outputPlaces    = document.getElementById('editor-output-places');
-    ui.lastCoord       = document.getElementById('last-coord');
-    ui.newPlaceInput   = document.getElementById('new-place-name');
+    ui.mapList = document.getElementById('map-list');
+    ui.mapTitle = document.querySelector('.map-title-overlay');
+    ui.panelLearn = document.getElementById('panel-explore');
+    ui.panelPractice = document.getElementById('panel-practice');
+    ui.panelEditor = document.getElementById('editor-panel');
+    ui.practiceArea = document.getElementById('practice-game-area');
+    ui.termList = document.getElementById('term-list');
+    ui.feedback = document.getElementById('feedback-area');
+    ui.btnCheck = document.getElementById('btn-check-answers');
+    ui.btnStart = document.getElementById('btn-start-practice');
+    ui.outputPoly = document.getElementById('editor-output-poly');
+    ui.outputRivers = document.getElementById('editor-output-rivers');
+    ui.outputPlaces = document.getElementById('editor-output-places');
+    ui.lastCoord = document.getElementById('last-coord');
+    ui.newPlaceInput = document.getElementById('new-place-name');
 
     map = L.map('map', { zoomControl: false, attributionControl: false, contextmenu: true });
-    
+
     // Base Layer: The "Biblical" look. We set maxNativeZoom to 8 so Leaflet upscales tiles instead of turning white.
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', { 
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
         maxNativeZoom: 8,
-        maxZoom: 19 
+        maxZoom: 19
     }).addTo(map);
-    
+
     // Topography Overlay: Adds the "3D" depth feel.
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}', { 
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}', {
         maxNativeZoom: 15,
-        maxZoom: 19, 
-        opacity: 0.35 
+        maxZoom: 19,
+        opacity: 0.35
     }).addTo(map);
 
     mapLayers = L.layerGroup().addTo(map);
@@ -66,7 +66,7 @@ function init() {
 
     map.on('click', (e) => {
         if (currentMode !== 'editor') return;
-        
+
         // Update last coordinate display
         if (ui.lastCoord) {
             ui.lastCoord.textContent = `[${e.latlng.lat.toFixed(3)}, ${e.latlng.lng.toFixed(3)}]`;
@@ -76,19 +76,19 @@ function init() {
         if (e.originalEvent.ctrlKey) {
             const clickPos = e.latlng;
             let closestObj = null;
-            let minDist = 0.05; 
-            
+            let minDist = 0.05;
+
             // Polygons
             Object.keys(editorPolygons).forEach(id => {
                 editorPolygons[id].forEach((p, idx) => {
-                    const d = Math.sqrt(Math.pow(p[0]-clickPos.lat,2) + Math.pow(p[1]-clickPos.lng,2));
+                    const d = Math.sqrt(Math.pow(p[0] - clickPos.lat, 2) + Math.pow(p[1] - clickPos.lng, 2));
                     if (d < minDist) { minDist = d; closestObj = { data: editorPolygons[id], idx }; }
                 });
             });
             // Rivers
             Object.keys(editorRivers).forEach(id => {
                 editorRivers[id].forEach((p, idx) => {
-                    const d = Math.sqrt(Math.pow(p[0]-clickPos.lat,2) + Math.pow(p[1]-clickPos.lng,2));
+                    const d = Math.sqrt(Math.pow(p[0] - clickPos.lat, 2) + Math.pow(p[1] - clickPos.lng, 2));
                     if (d < minDist) { minDist = d; closestObj = { data: editorRivers[id], idx }; }
                 });
             });
@@ -102,13 +102,13 @@ function init() {
     map.on('zoomend', updateMapZoomClass);
     updateMapZoomClass();
     initMobileSidebar();
-    
+
     // Hide editor tab if disabled
     if (!SHOW_EDITOR) {
         const editorTab = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText.includes('עורך'));
         if (editorTab) editorTab.style.display = 'none';
     }
-    
+
     setTimeout(() => { map.invalidateSize(); }, 500);
 }
 
@@ -129,10 +129,10 @@ function initMobileSidebar() {
         startY = e.touches[0].clientY;
         startHeight = sidebar.offsetHeight;
         sidebar.classList.add('dragging');
-        
+
         if (sidebar.classList.contains('collapsed')) {
             sidebar.classList.remove('collapsed');
-            startHeight = 60; 
+            startHeight = 60;
         }
     };
 
@@ -141,10 +141,10 @@ function initMobileSidebar() {
         e.preventDefault(); // Prevent page scroll while dragging
         const deltaY = startY - e.touches[0].clientY;
         const newHeight = startHeight + deltaY;
-        
+
         const maxHeight = window.innerHeight * 0.95;
         const minHeight = 60;
-        
+
         if (newHeight >= minHeight && newHeight <= maxHeight) {
             sidebar.style.height = `${newHeight}px`;
             // Continuously resize the map so it fills the available space
@@ -157,11 +157,11 @@ function initMobileSidebar() {
         if (!isDragging) return;
         isDragging = false;
         sidebar.classList.remove('dragging');
-        
+
         const currentHeight = sidebar.offsetHeight;
         if (currentHeight < 100) {
             sidebar.classList.add('collapsed');
-            sidebar.style.height = ''; 
+            sidebar.style.height = '';
         } else if (currentHeight > window.innerHeight * 0.8) {
             sidebar.style.height = '95vh';
         }
@@ -186,13 +186,13 @@ function sidebarTo40() {
 function toggleSidebar() {
     const sb = document.getElementById('sidebar');
     if (!sb) return;
-    
+
     if (sb.classList.contains('collapsed')) {
         sb.classList.remove('collapsed');
         sb.style.height = '40vh';
     } else {
         sb.classList.add('collapsed');
-        sb.style.height = ''; 
+        sb.style.height = '';
     }
     setTimeout(() => map.invalidateSize(), 400);
 }
@@ -204,8 +204,8 @@ function renderMapList() {
         const btn = document.createElement('button');
         btn.className = 'map-btn';
         btn.textContent = m.title;
-        btn.onclick = () => { 
-            loadMap(m.id); 
+        btn.onclick = () => {
+            loadMap(m.id);
             if (currentMode === 'editor') syncEditorWithCurrentMap(true);
             if (window.innerWidth <= 768) {
                 const sb = document.getElementById('sidebar');
@@ -309,10 +309,10 @@ function spawnDraggableRiver(riverId, color) {
     if (!points || points.length === 0) return;
 
     const layer = L.polyline(points, { color, weight: 4, dashArray: '5,5' }).addTo(editorLayers);
-    
+
     points.forEach((p, idx) => {
         const marker = L.circleMarker(p, { radius: 7, color: '#2980b9', fillColor: '#fff', fillOpacity: 1 }).addTo(editorLayers);
-        
+
         marker.on('mousedown', (e) => {
             L.DomEvent.stopPropagation(e);
             map.dragging.disable();
@@ -339,15 +339,15 @@ function spawnDraggableRiver(riverId, color) {
 
         // Ghost points
         if (idx < points.length - 1) {
-            const pNext = points[idx+1];
+            const pNext = points[idx + 1];
             const midLat = (p[0] + pNext[0]) / 2;
             const midLng = (p[1] + pNext[1]) / 2;
             const mid = [Number(midLat.toFixed(4)), Number(midLng.toFixed(4))];
-            
+
             const ghost = L.circleMarker(mid, { radius: 7, color: '#2980b9', fillColor: '#fff', fillOpacity: 0.5 }).addTo(editorLayers);
             ghost.on('click', (e) => {
                 L.DomEvent.stopPropagation(e);
-                points.splice(idx+1, 0, mid);
+                points.splice(idx + 1, 0, mid);
                 syncEditorWithCurrentMap(false);
             });
         }
@@ -359,7 +359,7 @@ function spawnDraggablePolygon(polyId, color) {
     if (!points || points.length === 0) return;
 
     const polyLayer = L.polygon(points, { color, weight: 3, dashArray: '5,5', fillOpacity: 0.1, interactive: false }).addTo(editorLayers);
-    
+
     points.forEach((p, idx) => {
         // Main vertex marker
         const marker = L.circleMarker(p, {
@@ -375,10 +375,10 @@ function spawnDraggablePolygon(polyId, color) {
                 points[idx] = n;
                 polyLayer.setLatLngs(points);
             };
-            const up = () => { 
-                map.off('mousemove', move); map.off('mouseup', up); 
-                map.dragging.enable(); 
-                updateEditorOutputs(); 
+            const up = () => {
+                map.off('mousemove', move); map.off('mouseup', up);
+                map.dragging.enable();
+                updateEditorOutputs();
             };
             map.on('mousemove', move); map.on('mouseup', up);
         });
@@ -402,12 +402,12 @@ function spawnDraggablePolygon(polyId, color) {
         // Add Midpoint (Ghost) Marker between this point and the next
         const nextIdx = (idx + 1) % points.length;
         const pNext = points[nextIdx];
-        
+
         // Only show ghost if there's more than 1 point to connect to
         if (points.length > 1) {
             const midLat = (p[0] + pNext[0]) / 2;
             const midLng = (p[1] + pNext[1]) / 2;
-            
+
             const ghost = L.circleMarker([midLat, midLng], {
                 radius: 7, color: color, fillColor: '#fff', fillOpacity: 0.7, weight: 2, interactive: true
             }).addTo(editorLayers);
@@ -417,16 +417,16 @@ function spawnDraggablePolygon(polyId, color) {
                 points.splice(idx + 1, 0, [Number(midLat.toFixed(4)), Number(midLng.toFixed(4))]);
                 syncEditorWithCurrentMap();
             });
-            
+
             // Allow dragging the ghost to create a new point immediately
             ghost.on('mousedown', (me) => {
                 L.DomEvent.stopPropagation(me);
                 map.dragging.disable();
-                
+
                 // Create the point immediately
                 points.splice(idx + 1, 0, [Number(midLat.toFixed(4)), Number(midLng.toFixed(4))]);
                 const newPointIdx = idx + 1;
-                
+
                 const move = (ev) => {
                     const n = [Number(ev.latlng.lat.toFixed(4)), Number(ev.latlng.lng.toFixed(4))];
                     points[newPointIdx] = n;
@@ -434,10 +434,10 @@ function spawnDraggablePolygon(polyId, color) {
                     // Temporarily update ghost pos to follow mouse if we didn't re-sync yet
                     ghost.setLatLng(ev.latlng);
                 };
-                
-                const up = () => { 
-                    map.off('mousemove', move); map.off('mouseup', up); 
-                    map.dragging.enable(); 
+
+                const up = () => {
+                    map.off('mousemove', move); map.off('mouseup', up);
+                    map.dragging.enable();
                     syncEditorWithCurrentMap(); // Full refresh to get all markers right
                 };
                 map.on('mousemove', move); map.on('mouseup', up);
@@ -448,19 +448,19 @@ function spawnDraggablePolygon(polyId, color) {
 
 function spawnDraggableArrow(f, fIdx) {
     const s = f.start, e = f.end;
-    
+
     // Initialize control points if they don't exist
     if (!f.cp1 && !f.cp) {
-        const mid = [Number(((s[0]+e[0])/2).toFixed(4)), Number(((s[1]+e[1])/2).toFixed(4))];
-        const offLat = (e[1]-s[1])*0.1, offLng = -(e[0]-s[0])*0.1;
-        f.cp1 = [Number((mid[0]+offLat).toFixed(4)), Number((mid[1]+offLng).toFixed(4))];
+        const mid = [Number(((s[0] + e[0]) / 2).toFixed(4)), Number(((s[1] + e[1]) / 2).toFixed(4))];
+        const offLat = (e[1] - s[1]) * 0.1, offLng = -(e[0] - s[0]) * 0.1;
+        f.cp1 = [Number((mid[0] + offLat).toFixed(4)), Number((mid[1] + offLng).toFixed(4))];
     } else if (f.cp && !f.cp1) {
         f.cp1 = f.cp;
     }
 
     if (!f.cp2) {
         // Default cp2 near end or slightly offset from cp1
-        f.cp2 = [Number((f.end[0] - (f.end[0]-f.start[0])*0.2).toFixed(4)), Number((f.end[1] - (f.end[1]-f.start[1])*0.2).toFixed(4))];
+        f.cp2 = [Number((f.end[0] - (f.end[0] - f.start[0]) * 0.2).toFixed(4)), Number((f.end[1] - (f.end[1] - f.start[1]) * 0.2).toFixed(4))];
     }
 
     if (!f.iconPos) f.iconPos = f.cp1;
@@ -476,10 +476,10 @@ function spawnDraggableArrow(f, fIdx) {
                 f[prop] = n;
                 refreshMapDisplay();
             };
-            const up = () => { 
-                map.off('mousemove', move); map.off('mouseup', up); 
-                map.dragging.enable(); 
-                updateEditorOutputs(); 
+            const up = () => {
+                map.off('mousemove', move); map.off('mouseup', up);
+                map.dragging.enable();
+                updateEditorOutputs();
             };
             map.on('mousemove', move); map.on('mouseup', up);
         });
@@ -489,7 +489,7 @@ function spawnDraggableArrow(f, fIdx) {
     const endMarker = L.circleMarker(f.end, { radius: 8, color: '#e74c3c', fillColor: '#fff', fillOpacity: 1, weight: 3 }).addTo(editorLayers);
     const cp1Marker = L.circleMarker(f.cp1, { radius: 6, color: '#3498db', fillColor: '#fff', fillOpacity: 0.8, weight: 2 }).addTo(editorLayers);
     const cp2Marker = L.circleMarker(f.cp2, { radius: 6, color: '#9b59b6', fillColor: '#fff', fillOpacity: 0.8, weight: 2 }).addTo(editorLayers);
-    
+
     dragLogic(startMarker, 'start');
     dragLogic(endMarker, 'end');
     dragLogic(cp1Marker, 'cp1');
@@ -499,24 +499,24 @@ function spawnDraggableArrow(f, fIdx) {
     if (f.icon || f.emoji) {
         const iconMarker = L.circleMarker(f.iconPos, { radius: 10, color: '#27ae60', fillColor: '#fff', fillOpacity: 1, weight: 2 }).addTo(editorLayers);
         dragLogic(iconMarker, 'iconPos');
-        
+
         // Icon size "handle" marker
-        const sizeHandlePos = [f.iconPos[0], f.iconPos[1] + (f.iconSize*0.002)];
+        const sizeHandlePos = [f.iconPos[0], f.iconPos[1] + (f.iconSize * 0.002)];
         const sizeMarker = L.circleMarker(sizeHandlePos, { radius: 5, color: '#2ecc71', fillColor: '#2ecc71', fillOpacity: 0.5 }).addTo(editorLayers);
-        
+
         sizeMarker.on('mousedown', (me) => {
             L.DomEvent.stopPropagation(me);
             map.dragging.disable();
             const move = (ev) => {
                 const dist = Math.sqrt(Math.pow(ev.latlng.lat - f.iconPos[0], 2) + Math.pow(ev.latlng.lng - f.iconPos[1], 2));
-                f.iconSize = Math.max(10, Math.round(dist * 500)); 
+                f.iconSize = Math.max(10, Math.round(dist * 500));
                 sizeMarker.setLatLng(ev.latlng);
                 refreshMapDisplay();
             };
-            const up = () => { 
-                map.off('mousemove', move); map.off('mouseup', up); 
-                map.dragging.enable(); 
-                updateEditorOutputs(); 
+            const up = () => {
+                map.off('mousemove', move); map.off('mouseup', up);
+                map.dragging.enable();
+                updateEditorOutputs();
             };
             map.on('mousemove', move); map.on('mouseup', up);
         });
@@ -532,7 +532,7 @@ function refreshMapDisplay() {
 function addPointToEditor(latlng) {
     if (currentMode !== 'editor') return;
     const p = [Number(latlng.lat.toFixed(4)), Number(latlng.lng.toFixed(4))];
-    
+
     if (activeLayerType === 'polygon') {
         if (!activePolyId) activePolyId = 'new_poly';
         if (!editorPolygons[activePolyId]) editorPolygons[activePolyId] = [];
@@ -547,19 +547,19 @@ function addPointToEditor(latlng) {
 }
 
 // Removing obsolete single-poly functions
-function refreshEditorPolygons() {}
-function drawEditorLine() {}
+function refreshEditorPolygons() { }
+function drawEditorLine() { }
 
 function spawnDraggableIcon(f, fIdx) {
     const size = f.size || 40;
     const iconStyle = `font-size:${size}px; filter: drop-shadow(0 0 5px white);`;
-    const icon = L.divIcon({ 
-        className: 'custom-icon-marker editor-active', 
-        html: `<div style="${iconStyle}">${f.icon}</div>`, 
-        iconSize: [size, size], iconAnchor: [size/2, size/2] 
+    const icon = L.divIcon({
+        className: 'custom-icon-marker editor-active',
+        html: `<div style="${iconStyle}">${f.icon}</div>`,
+        iconSize: [size, size], iconAnchor: [size / 2, size / 2]
     });
     const marker = L.marker(f.pos, { icon, interactive: true }).addTo(editorLayers);
-    
+
     marker.on('mousedown', (me) => {
         L.DomEvent.stopPropagation(me);
         map.dragging.disable();
@@ -580,7 +580,7 @@ function spawnDraggablePlace(name, coords) {
         html: `<div class="city-dot" style="background:#2ecc71; border:2px solid white; box-shadow: 0 0 10px #2ecc71;"></div><div class="city-text" style="color:#27ae60; font-weight:bold;">${name}</div>`,
         iconSize: [120, 20], iconAnchor: [4, 10]
     });
-    
+
     const marker = L.marker(coords, { icon, interactive: true }).addTo(editorLayers);
     marker._isPlace = true;
 
@@ -643,12 +643,12 @@ function updateEditorOutputs() {
     }
 }
 
-function clearEditorPoints() { 
-    editorPolygons = {}; 
+function clearEditorPoints() {
+    editorPolygons = {};
     editorRivers = {};
     activePolyId = 'new_poly';
     activeRiverId = 'new_river';
-    syncEditorWithCurrentMap(false); 
+    syncEditorWithCurrentMap(false);
 }
 
 function copyToClipboard(id) {
@@ -661,7 +661,7 @@ function copyToClipboard(id) {
 
 function togglePlacesVisibility(el) {
     if (el) hidePlaces = el.checked;
-    
+
     // Sync all checkboxes
     const cb1 = document.getElementById('hide-places-toggle');
     const cb2 = document.getElementById('hide-places-global');
@@ -669,7 +669,7 @@ function togglePlacesVisibility(el) {
     if (cb2) cb2.checked = hidePlaces;
 
     if (currentMode === 'editor') syncEditorWithCurrentMap();
-    
+
     // Refresh mapLayer cities without flying the camera
     if (currentMapObj) loadMap(currentMapObj.id, true);
 }
@@ -684,7 +684,7 @@ function loadMap(mapId, skipFly = false) {
 
     mapLayers.clearLayers();
     const b = MAP_DATA.bounds[mapObj.bounds || "israel"];
-    
+
     let options = { animate: true, duration: 1.5, padding: [30, 30] };
     if (window.innerWidth <= 768) {
         const sbHeight = document.getElementById('sidebar')?.offsetHeight || window.innerHeight * 0.4;
@@ -705,7 +705,7 @@ function loadMap(mapId, skipFly = false) {
             }
             if (f.type === "route") L.polyline(MAP_DATA.routes[f.id], { color: f.color || "#e67e22", weight: 2, dashArray: "5,5" }).addTo(mapLayers);
             if (f.type === "textlabel") {
-                const icon = L.divIcon({ className: 'custom-region-marker', html: `<div class="region-text ${f.size || 'small'}" style="${f.rotate ? `transform: rotate(${f.rotate}deg);`:''}" dir="rtl">${f.text}</div>`, iconSize: [200, 40], iconAnchor:[100,20] });
+                const icon = L.divIcon({ className: 'custom-region-marker', html: `<div class="region-text ${f.size || 'small'}" style="${f.rotate ? `transform: rotate(${f.rotate}deg);` : ''}" dir="rtl">${f.text}</div>`, iconSize: [200, 40], iconAnchor: [100, 20] });
                 L.marker(f.pos, { icon, interactive: false }).addTo(mapLayers);
             }
             if (f.type === "arrow") drawArrow(f);
@@ -715,7 +715,7 @@ function loadMap(mapId, skipFly = false) {
             }
             if (f.type === "icon") {
                 const size = f.size || 40;
-                const icon = L.divIcon({ className: 'custom-icon-marker', html: `<div style="font-size: ${size}px;">${f.icon}</div>`, iconSize: [size, size], iconAnchor: [size/2, size/2] });
+                const icon = L.divIcon({ className: 'custom-icon-marker', html: `<div style="font-size: ${size}px;">${f.icon}</div>`, iconSize: [size, size], iconAnchor: [size / 2, size / 2] });
                 L.marker(f.pos, { icon, interactive: false }).addTo(mapLayers);
             }
         });
@@ -731,11 +731,11 @@ function loadMap(mapId, skipFly = false) {
             if (isMultiline) {
                 displayText = rn.replace("האימפריה ", "האימפריה<br>").replace("ממלכת ", "ממלכת<br>");
             }
-            const icon = L.divIcon({ 
-                className: 'custom-region-marker', 
-                html: `<div class="region-text ${size} ${isMultiline ? 'multiline' : ''}" dir="rtl">${displayText}</div>`, 
-                iconSize: [250, 100], 
-                iconAnchor: [125, 50] 
+            const icon = L.divIcon({
+                className: 'custom-region-marker',
+                html: `<div class="region-text ${size} ${isMultiline ? 'multiline' : ''}" dir="rtl">${displayText}</div>`,
+                iconSize: [250, 100],
+                iconAnchor: [125, 50]
             });
             L.marker([r[0], r[1]], { icon, interactive: false }).addTo(mapLayers);
         });
@@ -744,9 +744,9 @@ function loadMap(mapId, skipFly = false) {
     if (!hidePlaces) {
         // Collect all cities for this map
         const citiesToDraw = [];
-        if (mapObj.fadedPlaces) mapObj.fadedPlaces.forEach(p => citiesToDraw.push({name: p, faded: true}));
-        if (mapObj.places) mapObj.places.forEach(p => citiesToDraw.push({name: p, faded: false}));
-        
+        if (mapObj.fadedPlaces) mapObj.fadedPlaces.forEach(p => citiesToDraw.push({ name: p, faded: true }));
+        if (mapObj.places) mapObj.places.forEach(p => citiesToDraw.push({ name: p, faded: false }));
+
         // Improved collision detection: decide offset direction for each city
         const COLLISION_DIST = 0.18;
         const offsetMap = {}; // name -> offsetClass
@@ -798,13 +798,13 @@ function drawCity(name, faded, offsetClass = "") {
     const coords = editorPlaces[name] || MAP_DATA.places[name];
     if (!coords) return;
     // Use definitive absolute positioning for maximum accuracy on all browsers
-    const icon = L.divIcon({ 
-        className: `custom-city-marker ${faded?'faded':''} ${offsetClass}`, 
-        html: `<div class="city-dot"></div><div class="city-text" dir="rtl">${name}</div>`, 
-        iconSize: [0, 0], 
-        iconAnchor: [0, 0] 
+    const icon = L.divIcon({
+        className: `custom-city-marker ${faded ? 'faded' : ''} ${offsetClass}`,
+        html: `<div class="city-dot"></div><div class="city-text" dir="rtl">${name}</div>`,
+        iconSize: [0, 0],
+        iconAnchor: [0, 0]
     });
-    const m = L.marker(coords, { icon, interactive: false}).addTo(mapLayers);
+    const m = L.marker(coords, { icon, interactive: false }).addTo(mapLayers);
     m._isMapCity = true;
 }
 
@@ -815,13 +815,13 @@ function drawArrow(f) {
 
     // Cubic Bezier curve calculation
     const pts = [];
-    for(let t=0; t<=1; t+=0.02) { 
+    for (let t = 0; t <= 1; t += 0.02) {
         const it = 1 - t;
-        const x = it*it*it*s[0] + 3*it*it*t*cp1[0] + 3*it*t*t*cp2[0] + t*t*t*e[0];
-        const y = it*it*it*s[1] + 3*it*it*t*cp1[1] + 3*it*t*t*cp2[1] + t*t*t*e[1];
+        const x = it * it * it * s[0] + 3 * it * it * t * cp1[0] + 3 * it * t * t * cp2[0] + t * t * t * e[0];
+        const y = it * it * it * s[1] + 3 * it * it * t * cp1[1] + 3 * it * t * t * cp2[1] + t * t * t * e[1];
         pts.push([x, y]);
     }
-    
+
     const color = f.color || "#e67e22";
     L.polyline(pts, { color, weight: 3, dashArray: "10,5", opacity: 0.8 }).addTo(mapLayers);
 
@@ -833,17 +833,17 @@ function drawArrow(f) {
         const dLng = lastPt[1] - prevPt[1];
         const angle = Math.atan2(dLat, dLng);
         const headSize = 0.15;
-        const h1 = [lastPt[0] - headSize * Math.sin(angle - Math.PI/6), lastPt[1] - headSize * Math.cos(angle - Math.PI/6)];
-        const h2 = [lastPt[0] - headSize * Math.sin(angle + Math.PI/6), lastPt[1] - headSize * Math.cos(angle + Math.PI/6)];
+        const h1 = [lastPt[0] - headSize * Math.sin(angle - Math.PI / 6), lastPt[1] - headSize * Math.cos(angle - Math.PI / 6)];
+        const h2 = [lastPt[0] - headSize * Math.sin(angle + Math.PI / 6), lastPt[1] - headSize * Math.cos(angle + Math.PI / 6)];
         L.polygon([lastPt, h1, h2], { color, fillColor: color, fillOpacity: 1, weight: 1, interactive: false }).addTo(mapLayers);
     }
 
     if (f.icon || f.emoji) {
         const size = f.iconSize || 60;
-        const icon = L.divIcon({ 
-            className: 'custom-arrow-marker', 
-            html: `<div class="arrow-emoji" style="text-shadow: 0 0 5px white; font-size: ${size}px;">${f.icon || f.emoji}</div>`, 
-            iconSize: [size, size], iconAnchor: [size/2, size/2] 
+        const icon = L.divIcon({
+            className: 'custom-arrow-marker',
+            html: `<div class="arrow-emoji" style="text-shadow: 0 0 5px white; font-size: ${size}px;">${f.icon || f.emoji}</div>`,
+            iconSize: [size, size], iconAnchor: [size / 2, size / 2]
         });
         L.marker(f.iconPos || cp1, { icon, interactive: false }).addTo(mapLayers);
     }
@@ -854,20 +854,20 @@ function startPracticeSession() {
     ui.practiceArea.classList.remove('hidden');
     ui.feedback.textContent = '';
     ui.feedback.className = 'feedback-area';
-    
+
     // Clear map and set global view
     mapLayers.clearLayers();
     const israelBounds = MAP_DATA.bounds["israel"];
-    
+
     let options = { padding: [50, 50] };
     if (window.innerWidth <= 768) {
         const sbHeight = document.getElementById('sidebar')?.offsetHeight || window.innerHeight * 0.4;
-        options.paddingBottomRight = [20, sbHeight + 60]; 
+        options.paddingBottomRight = [20, sbHeight + 60];
         options.paddingTopLeft = [20, 20];
     }
     map.flyToBounds(israelBounds, options);
     ui.mapTitle.textContent = "תרגול זיהוי מקומות (רנדומלי)";
-    
+
     // Prepare buttons
     ui.btnCheck.innerHTML = "בדוק תשובות";
     ui.btnCheck.style.background = ""; // Reset custom success background
@@ -882,7 +882,7 @@ function startPracticeSession() {
     while (selected.length < 4 && attempts < 200) {
         const candidate = allPlaces[Math.floor(Math.random() * allPlaces.length)];
         const candCoord = MAP_DATA.places[candidate];
-        
+
         if (candCoord) {
             const isTooClose = selected.some(s => {
                 const sCoord = MAP_DATA.places[s];
@@ -906,16 +906,16 @@ function startPracticeSession() {
 
     ui.termList.innerHTML = '';
     practiceState.mapping = {};
-    
+
     selected.forEach((name, idx) => {
         const num = idx + 1;
         const c = MAP_DATA.places[name];
         practiceState.mapping[num] = name;
-        
-        const icon = L.divIcon({ 
-            className: 'practice-marker', 
-            html: `<div style="background:#e67e22; color:white; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-weight:bold; border:2px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);">${num}</div>`, 
-            iconSize: [30, 30], iconAnchor: [15, 15] 
+
+        const icon = L.divIcon({
+            className: 'practice-marker',
+            html: `<div style="background:#e67e22; color:white; border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-weight:bold; border:2px solid white; box-shadow:0 0 10px rgba(0,0,0,0.3);">${num}</div>`,
+            iconSize: [30, 30], iconAnchor: [15, 15]
         });
         L.marker(c, { icon }).addTo(mapLayers);
     });
@@ -925,7 +925,7 @@ function startPracticeSession() {
     shuffledNames.forEach(name => {
         const item = document.createElement('div');
         item.className = 'term-item';
-        
+
         item.innerHTML = `
             <span class="term-name">${name} <span class="mark"></span></span>
             <div class="number-selector">
@@ -943,14 +943,14 @@ function startPracticeSession() {
             b.onclick = () => {
                 const wasSelected = b.classList.contains('selected');
                 btns.forEach(btn => btn.classList.remove('selected'));
-                
+
                 if (!wasSelected) {
                     b.classList.add('selected');
                     input.value = b.dataset.val;
                 } else {
                     input.value = "";
                 }
-                
+
                 // Clear marks on change
                 item.querySelector('.mark').textContent = '';
                 item.classList.remove('correct', 'wrong');
@@ -968,12 +968,12 @@ function calculateDistance(p1, p2) {
 function checkPracticeAnswers() {
     const items = document.querySelectorAll('.term-item');
     let correctCount = 0;
-    
+
     items.forEach(item => {
         const select = item.querySelector('.term-select');
         const mark = item.querySelector('.mark');
         const isCorrect = practiceState.mapping[select.value] === select.dataset.place;
-        
+
         if (select.value === "") {
             mark.textContent = ' ⚠️';
             item.classList.remove('correct', 'wrong');
@@ -988,15 +988,15 @@ function checkPracticeAnswers() {
             item.classList.remove('correct');
         }
     });
-    
-    if (correctCount === items.length) { 
-        ui.feedback.className = 'feedback-area success'; 
+
+    if (correctCount === items.length) {
+        ui.feedback.className = 'feedback-area success';
         ui.feedback.textContent = '🟢 כל הכבוד! הכל נכון.';
         ui.btnCheck.innerHTML = "שאלה הבאה ➔";
         ui.btnCheck.style.background = "#2ecc71";
         ui.btnCheck.onclick = startPracticeSession;
-    } else { 
-        ui.feedback.className = 'feedback-area error'; 
+    } else {
+        ui.feedback.className = 'feedback-area error';
         ui.feedback.textContent = `🔴 יש לך טעויות. תקן ונסה שוב!`;
         ui.btnCheck.innerHTML = "בדוק שוב";
         ui.btnCheck.onclick = checkPracticeAnswers;
@@ -1005,11 +1005,11 @@ function checkPracticeAnswers() {
 
 function smoothPolygon(p) {
     let cur = p;
-    for(let i=0; i<3; i++) {
+    for (let i = 0; i < 3; i++) {
         let next = [];
-        for(let j=0; j<cur.length; j++) {
-            let p0 = cur[j], p1 = cur[(j+1)%cur.length];
-            next.push([0.75*p0[0]+0.25*p1[0], 0.75*p0[1]+0.25*p1[1]], [0.25*p0[0]+0.75*p1[0], 0.25*p0[1]+0.75*p1[1]]);
+        for (let j = 0; j < cur.length; j++) {
+            let p0 = cur[j], p1 = cur[(j + 1) % cur.length];
+            next.push([0.75 * p0[0] + 0.25 * p1[0], 0.75 * p0[1] + 0.25 * p1[1]], [0.25 * p0[0] + 0.75 * p1[0], 0.25 * p0[1] + 0.75 * p1[1]]);
         }
         cur = next;
     }
@@ -1018,13 +1018,13 @@ function smoothPolygon(p) {
 
 function smoothRiver(p) {
     let cur = [...p];
-    for(let i=0; i<3; i++) {
+    for (let i = 0; i < 3; i++) {
         let next = [cur[0]];
-        for(let j=0; j<cur.length-1; j++) {
-            let p0 = cur[j], p1 = cur[j+1];
-            next.push([0.75*p0[0]+0.25*p1[0], 0.75*p0[1]+0.25*p1[1]], [0.25*p0[0]+0.75*p1[0], 0.25*p0[1]+0.75*p1[1]]);
+        for (let j = 0; j < cur.length - 1; j++) {
+            let p0 = cur[j], p1 = cur[j + 1];
+            next.push([0.75 * p0[0] + 0.25 * p1[0], 0.75 * p0[1] + 0.25 * p1[1]], [0.25 * p0[0] + 0.75 * p1[0], 0.25 * p0[1] + 0.75 * p1[1]]);
         }
-        next.push(cur[cur.length-1]);
+        next.push(cur[cur.length - 1]);
         cur = next;
     }
     return cur;
@@ -1252,19 +1252,19 @@ function renderMapContext(mapObj) {
     const ctx = MAP_CONTEXTS[mapObj.id];
     const isMobile = window.innerWidth <= 768;
 
-    const overlay   = document.getElementById('map-info-overlay');
-    const mioEmoji  = document.getElementById('mio-emoji');
-    const mioTitle  = document.getElementById('mio-title');
+    const overlay = document.getElementById('map-info-overlay');
+    const mioEmoji = document.getElementById('mio-emoji');
+    const mioTitle = document.getElementById('mio-title');
     const mioHeader = document.getElementById('mio-header');
-    const mioBody   = document.getElementById('mio-body');
-    const infoBtn   = document.getElementById('map-info-btn');
+    const mioBody = document.getElementById('mio-body');
+    const infoBtn = document.getElementById('map-info-btn');
     const mimHeader = document.getElementById('mim-header');
-    const mimBody   = document.getElementById('mim-body');
+    const mimBody = document.getElementById('mim-body');
 
     // Hide everything when no context for this map
     if (!ctx) {
-        if (overlay)  overlay.classList.add('hidden');
-        if (infoBtn)  infoBtn.classList.add('hidden');
+        if (overlay) overlay.classList.add('hidden');
+        if (infoBtn) infoBtn.classList.add('hidden');
         return;
     }
 
@@ -1309,7 +1309,7 @@ function renderMapContext(mapObj) {
         if (mioEmoji) mioEmoji.textContent = ctx.emoji;
         if (mioTitle) mioTitle.textContent = ctx.title;
         if (mioHeader) mioHeader.style.background = `linear-gradient(135deg, ${ctx.color}ee, ${ctx.color}bb)`;
-        if (mioBody)  buildBodyContent(mioBody);
+        if (mioBody) buildBodyContent(mioBody);
 
         // Restore minimized state on each new map
         _overlayMinimized = false;
@@ -1331,7 +1331,7 @@ function renderMapContext(mapObj) {
 let _overlayMinimized = false;
 function toggleMapInfoOverlay() {
     const overlay = document.getElementById('map-info-overlay');
-    const btn     = document.getElementById('mio-minimize');
+    const btn = document.getElementById('mio-minimize');
     if (!overlay) return;
     _overlayMinimized = !_overlayMinimized;
     if (_overlayMinimized) {
