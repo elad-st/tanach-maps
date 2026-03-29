@@ -12,7 +12,7 @@ let editorPlaces = {};
 let activePolyId = null;
 let activeRiverId = null;
 let activeLayerType = 'polygon';
-const SHOW_EDITOR = false; // Set to true to enable the editor tab again
+const SHOW_EDITOR = true; // Set to true to enable the editor tab again
 
 const ui = {};
 
